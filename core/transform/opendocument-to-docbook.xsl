@@ -78,6 +78,23 @@
         <xsl:if test="normalize-space(.) or descendant::draw:frame">
             <xsl:element name="db:para">
                 <xsl:variable name="text-style" select="key('styles-by-name', @text:style-name)"/>
+
+                <xsl:variable name="style-alignment" select="$text-style/style:paragraph-properties/@fo:text-align"/>
+                <xsl:variable name="parent-style-alignment" select="key('styles-by-name', key('styles-by-name', @text:style-name)/@style:parent-style-name)/style:paragraph-properties/@fo:text-align"/>
+                <xsl:if test="normalize-space(concat($style-alignment,$parent-style-alignment))">
+                    <xsl:attribute name="align">
+                        <xsl:choose>
+                            <xsl:when test="$style-alignment='start'">left</xsl:when>
+                            <xsl:when test="$style-alignment='center'">center</xsl:when>
+                            <xsl:when test="$style-alignment='end'">right</xsl:when>
+                            <xsl:when test="$parent-style-alignment='start'">left</xsl:when>
+                            <xsl:when test="$parent-style-alignment='center'">center</xsl:when>
+                            <xsl:when test="$parent-style-alignment='end'">right</xsl:when>
+                            <xsl:otherwise>left</xsl:otherwise><!-- awfully western of me to default to 'left', sorry -->
+                        </xsl:choose>
+                    </xsl:attribute>
+                </xsl:if>
+
                 <xsl:choose>
                     <xsl:when test="translate(@text:style-name, $uppercase, $lowercase) = 'title'">
                         <xsl:element name="db:emphasis">
@@ -100,6 +117,7 @@
                         <xsl:apply-templates/>
                     </xsl:otherwise>
                 </xsl:choose>
+
             </xsl:element>
         </xsl:if>
     </xsl:template>

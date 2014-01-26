@@ -220,6 +220,9 @@
                 <xsl:value-of select="translate(@role, '.', '-')"/>
             </xsl:attribute>
         </xsl:if>
+        <xsl:if test="@align">
+            <xsl:attribute name="style">text-align: <xsl:value-of select="@align"/>;</xsl:attribute>
+        </xsl:if>
         <xsl:apply-templates/>
     </xsl:element>
 </xsl:template>
