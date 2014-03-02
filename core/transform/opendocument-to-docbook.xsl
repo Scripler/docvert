@@ -32,9 +32,9 @@
                     </xsl:element>
                 </xsl:if>
                 <xsl:apply-templates select="key('heading-children', generate-id())"/>
-                <xsl:if test="not(//text:h[@text:outline-level='1'])"><xsl:apply-templates select="//text:h"/></xsl:if>
+                <xsl:if test="not(//text:h[1][@text:outline-level='1'])"><xsl:apply-templates select="//text:h"/></xsl:if>
             </xsl:element>
-            <xsl:apply-templates select="text:h[@text:outline-level='1']"/>
+            <xsl:if test="//text:h[1][@text:outline-level='1']"><xsl:apply-templates select="text:h[@text:outline-level='1']"/></xsl:if>
         </xsl:element>
     </xsl:template>
 
@@ -74,52 +74,53 @@
         </xsl:choose>
     </xsl:template>
 
+    <xsl:template match="svg:desc" />
+    <xsl:template match="office:annotation" />
+
     <xsl:template match="text:p">
-        <xsl:if test="normalize-space(.) or descendant::draw:frame">
-            <xsl:element name="db:para">
-                <xsl:variable name="text-style" select="key('styles-by-name', @text:style-name)"/>
+        <xsl:element name="db:para">
+            <xsl:variable name="text-style" select="key('styles-by-name', @text:style-name)"/>
 
-                <xsl:variable name="style-alignment" select="$text-style/style:paragraph-properties/@fo:text-align"/>
-                <xsl:variable name="parent-style-alignment" select="key('styles-by-name', key('styles-by-name', @text:style-name)/@style:parent-style-name)/style:paragraph-properties/@fo:text-align"/>
-                <xsl:if test="normalize-space(concat($style-alignment,$parent-style-alignment))">
-                    <xsl:attribute name="align">
-                        <xsl:choose>
-                            <xsl:when test="$style-alignment='start'">left</xsl:when>
-                            <xsl:when test="$style-alignment='center'">center</xsl:when>
-                            <xsl:when test="$style-alignment='end'">right</xsl:when>
-                            <xsl:when test="$parent-style-alignment='start'">left</xsl:when>
-                            <xsl:when test="$parent-style-alignment='center'">center</xsl:when>
-                            <xsl:when test="$parent-style-alignment='end'">right</xsl:when>
-                            <xsl:otherwise>left</xsl:otherwise><!-- awfully western of me to default to 'left', sorry -->
-                        </xsl:choose>
-                    </xsl:attribute>
-                </xsl:if>
+            <xsl:variable name="style-alignment" select="$text-style/style:paragraph-properties/@fo:text-align"/>
+            <xsl:variable name="parent-style-alignment" select="key('styles-by-name', key('styles-by-name', @text:style-name)/@style:parent-style-name)/style:paragraph-properties/@fo:text-align"/>
+            <xsl:if test="normalize-space(concat($style-alignment,$parent-style-alignment))">
+                <xsl:attribute name="align">
+                    <xsl:choose>
+                        <xsl:when test="$style-alignment='start'">left</xsl:when>
+                        <xsl:when test="$style-alignment='center'">center</xsl:when>
+                        <xsl:when test="$style-alignment='end'">right</xsl:when>
+                        <xsl:when test="$parent-style-alignment='start'">left</xsl:when>
+                        <xsl:when test="$parent-style-alignment='center'">center</xsl:when>
+                        <xsl:when test="$parent-style-alignment='end'">right</xsl:when>
+                        <xsl:otherwise>left</xsl:otherwise><!-- awfully western of me to default to 'left', sorry -->
+                    </xsl:choose>
+                </xsl:attribute>
+            </xsl:if>
 
-                <xsl:choose>
-                    <xsl:when test="translate(@text:style-name, $uppercase, $lowercase) = 'title'">
-                        <xsl:element name="db:emphasis">
-                            <xsl:attribute name="role">title</xsl:attribute>
-                            <xsl:apply-templates/>
-                        </xsl:element>
-                    </xsl:when>
-                    <xsl:when test="contains($text-style/style:text-properties/@fo:font-weight, 'bold')">
-                        <xsl:element name="db:emphasis">
-                            <xsl:attribute name="role">bold</xsl:attribute>
-                            <xsl:apply-templates/>
-                        </xsl:element>
-                    </xsl:when>
-                    <xsl:when test="contains($text-style/style:text-properties/@fo:font-style, 'italic')">
-                        <xsl:element name="db:emphasis">
-                            <xsl:apply-templates/>
-                        </xsl:element>
-                    </xsl:when>
-                    <xsl:otherwise>
+            <xsl:choose>
+                <xsl:when test="translate(@text:style-name, $uppercase, $lowercase) = 'title'">
+                    <xsl:element name="db:emphasis">
+                        <xsl:attribute name="role">title</xsl:attribute>
                         <xsl:apply-templates/>
-                    </xsl:otherwise>
-                </xsl:choose>
+                    </xsl:element>
+                </xsl:when>
+                <xsl:when test="contains($text-style/style:text-properties/@fo:font-weight, 'bold')">
+                    <xsl:element name="db:emphasis">
+                        <xsl:attribute name="role">bold</xsl:attribute>
+                        <xsl:apply-templates/>
+                    </xsl:element>
+                </xsl:when>
+                <xsl:when test="contains($text-style/style:text-properties/@fo:font-style, 'italic')">
+                    <xsl:element name="db:emphasis">
+                        <xsl:apply-templates/>
+                    </xsl:element>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:apply-templates/>
+                </xsl:otherwise>
+            </xsl:choose>
 
-            </xsl:element>
-        </xsl:if>
+        </xsl:element>
     </xsl:template>
 
     <xsl:template match="text:ordered-list">
@@ -213,7 +214,7 @@
                     <!-- Preceding <xsl:for-each select="preceding::*">
                     &lt;<xsl:value-of select="local-name()"/><xsl:for-each select="@*">@<xsl:value-of select="local-name()"/>=<xsl:value-of select="."/>, </xsl:for-each>&gt;: <xsl:apply-templates/> </xsl:for-each>.
                     Text: <xsl:value-of select="."/> <xsl:apply-templates/>, -->
-                </xsl:message>                
+                </xsl:message>
             </xsl:if>
             <xsl:variable name="current-list-item-group-position">
                 <xsl:for-each select="$list-item-group">
@@ -435,24 +436,120 @@
                     </xsl:element>
                 </xsl:element>
             </xsl:when>
-            <xsl:when test="contains($text-style/style:text-properties/@fo:font-weight, 'bold')">
+            <xsl:otherwise>
+                <xsl:call-template name="addStyles">
+                    <xsl:with-param name="text-style" select="$text-style"/>
+                </xsl:call-template>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="addStyles">
+        <xsl:param name="text-style"/>
+        <xsl:call-template name="addStyleBold">
+            <xsl:with-param name="text-style" select="$text-style"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template name="addStyleBold">
+        <xsl:param name="text-style"/>
+        <xsl:choose>
+           <xsl:when test="contains($text-style/style:text-properties/@fo:font-weight, 'bold')">
                 <xsl:element name="db:emphasis">
                     <xsl:attribute name="role">bold</xsl:attribute>
-                    <xsl:apply-templates/>
+                    <xsl:call-template name="addStyleItalic">
+                        <xsl:with-param name="text-style" select="$text-style"/>
+                    </xsl:call-template>
                 </xsl:element>
             </xsl:when>
+            <xsl:otherwise>
+                <xsl:call-template name="addStyleItalic">
+                    <xsl:with-param name="text-style" select="$text-style"/>
+                </xsl:call-template>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="addStyleItalic">
+        <xsl:param name="text-style"/>
+        <xsl:choose>
             <xsl:when test="contains($text-style/style:text-properties/@fo:font-style, 'italic')">
                 <xsl:element name="db:emphasis">
-                    <xsl:apply-templates/>
+                    <xsl:call-template name="addStyleSubscript">
+                        <xsl:with-param name="text-style" select="$text-style"/>
+                    </xsl:call-template>
                 </xsl:element>
             </xsl:when>
+            <xsl:otherwise>
+                <xsl:call-template name="addStyleSubscript">
+                    <xsl:with-param name="text-style" select="$text-style"/>
+                </xsl:call-template>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="addStyleSubscript">
+        <xsl:param name="text-style"/>
+        <xsl:choose>
             <xsl:when test="contains($text-style/style:text-properties/@style:text-position, 'sub')">
                 <xsl:element name="db:subscript">
-                    <xsl:apply-templates/>
+                    <xsl:call-template name="addStyleSuperscript">
+                        <xsl:with-param name="text-style" select="$text-style"/>
+                    </xsl:call-template>
                 </xsl:element>
             </xsl:when>
+            <xsl:otherwise>
+                <xsl:call-template name="addStyleSuperscript">
+                    <xsl:with-param name="text-style" select="$text-style"/>
+                </xsl:call-template>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="addStyleSuperscript">
+        <xsl:param name="text-style"/>
+        <xsl:choose>
             <xsl:when test="contains($text-style/style:text-properties/@style:text-position, 'super')">
                 <xsl:element name="db:superscript">
+                    <xsl:call-template name="addStyleUnderline">
+                        <xsl:with-param name="text-style" select="$text-style"/>
+                    </xsl:call-template>
+                </xsl:element>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:call-template name="addStyleUnderline">
+                    <xsl:with-param name="text-style" select="$text-style"/>
+                </xsl:call-template>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="addStyleUnderline">
+        <xsl:param name="text-style"/>
+        <xsl:choose>
+            <xsl:when test="contains($text-style/style:text-properties/@style:text-underline-style, 'solid')">
+                <xsl:element name="db:emphasis">
+                    <xsl:attribute name="role">underline</xsl:attribute>
+                    <xsl:call-template name="addStyleColor">
+                        <xsl:with-param name="text-style" select="$text-style"/>
+                    </xsl:call-template>
+                </xsl:element>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:call-template name="addStyleColor">
+                    <xsl:with-param name="text-style" select="$text-style"/>
+                </xsl:call-template>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="addStyleColor">
+        <xsl:param name="text-style"/>
+        <xsl:choose>
+            <xsl:when test="$text-style/style:text-properties/@fo:color and not($text-style/style:text-properties/@fo:color = key('styles-by-name', 'Standard')/style:text-properties/@fo:color)">
+                <xsl:element name="db:emphasis">
+                    <xsl:attribute name="role">color</xsl:attribute>
+                    <xsl:attribute name="color"><xsl:value-of select="$text-style/style:text-properties/@fo:color"/></xsl:attribute>
                     <xsl:apply-templates/>
                 </xsl:element>
             </xsl:when>
@@ -500,7 +597,7 @@
     <xsl:template match="table:table">
         <xsl:element name="db:table">
             <xsl:attribute name="db:id"><xsl:value-of select="generate-id()"/></xsl:attribute>
-            <xsl:apply-templates/>                  
+            <xsl:apply-templates/>
         </xsl:element>
     </xsl:template>
 

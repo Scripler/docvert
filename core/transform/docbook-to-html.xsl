@@ -223,6 +223,9 @@
         <xsl:if test="@align">
             <xsl:attribute name="style">text-align: <xsl:value-of select="@align"/>;</xsl:attribute>
         </xsl:if>
+        <xsl:if test="not(normalize-space(.))">
+            <xsl:attribute name="class">empty-paragraph</xsl:attribute>
+        </xsl:if>
         <xsl:apply-templates/>
     </xsl:element>
 </xsl:template>
@@ -426,6 +429,18 @@
                 <xsl:apply-templates/>
             </xsl:element>
         </xsl:when>
+        <xsl:when test="@role = 'underline'">
+            <xsl:element name="span">
+                <xsl:attribute name="style">text-decoration: underline;</xsl:attribute>
+                <xsl:apply-templates/>
+            </xsl:element>
+        </xsl:when>
+        <xsl:when test="@role = 'color'">
+            <xsl:element name="span">
+                <xsl:attribute name="style">color: <xsl:value-of select="@color"/>;</xsl:attribute>
+                <xsl:apply-templates/>
+            </xsl:element>
+        </xsl:when>
         <xsl:otherwise>
             <xsl:element name="em">
                 <xsl:apply-templates/>
@@ -433,6 +448,19 @@
         </xsl:otherwise>
     </xsl:choose>
 </xsl:template>
+
+<xsl:template match="db:subscript">
+    <xsl:element name="sub">
+        <xsl:apply-templates/>
+    </xsl:element>
+</xsl:template>
+
+<xsl:template match="db:superscript">
+    <xsl:element name="sup">
+        <xsl:apply-templates/>
+    </xsl:element>
+</xsl:template>
+
 
 <xsl:template match="db:GUIMenuItem | db:GUISubMenu">
     <li>
