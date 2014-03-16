@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import lxml.etree
-import docvert_exception
+import core.docvert_exception as docvert_exception
 
 docvert_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -35,15 +35,16 @@ def get_pipeline_xml(pipeline_type, pipeline_id, auto_pipeline_id):
         autopipeline_path = os.path.join(docvert_root, "pipelines", "auto_pipelines", auto_pipeline_id, "pipeline.xml")
         if not os.path.exists(path):
             raise docvert_exception.unrecognised_auto_pipeline("Unknown auto pipeline '%s'" % auto_pipeline_id)
-        custom_stages = "".join(map(lxml.etree.tostring,xml.getroot()))
+        custom_stages = lxml.etree.tostring(xml.getroot()).decode()
+        #custom_stages = "".join(map(lxml.etree.tostring,xml.getroot()))
         autopipeline = ""
         try:        
             autopipeline_handle = open(autopipeline_path)
-        except IOError, e:
+        except (IOError) as e:
             autopipeline_path_with_default = os.path.join(docvert_root, "pipelines", "auto_pipelines", "%s.default" % auto_pipeline_id, "pipeline.xml")
             autopipeline_handle = open(autopipeline_path_with_default)
         autopipeline = autopipeline_handle.read().replace('{{custom-stages}}', custom_stages)
-        xml = lxml.etree.fromstring(autopipeline)
+        xml = lxml.etree.fromstring(autopipeline.encode())
         xml = xml.getroottree()
         #print autopipeline
     return dict(xml=xml, pipeline_directory=os.path.dirname(path), path=path, autopath=autopipeline_path)

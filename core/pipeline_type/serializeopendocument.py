@@ -37,7 +37,7 @@ class SerializeOpenDocument(pipeline_item.pipeline_stage):
             archive.writestr(filename, xml)
             manifest_xml += '\t<manifest:file-entry manifest:media-type="%s" manifest:full-path="%s"/>\n' % (cgi.escape('text/xml'), cgi.escape(filename))
         manifest_xml += '\t<manifest:file-entry media-type="" manifest:full-path="Pictures/"/>\n'
-        imagetypes = {".svg":"image/svg+xml", ".png":"image/png", ".gif":"image/gif", ".bmp":"image/x-ms-bmp", ".jpg":"image/jpeg", ".jpe":"image/jpeg", ".jpeg":"image/jpeg"}
+        imagetypes = {".svg":"image/svg+xml", ".png":"image/png", ".gif":"image/gif", ".bmp":"image/x-ms-bmp", ".jpg":"image/jpeg", ".jpe":"image/jpeg", ".jpeg":"image/jpeg", ".tif":"image/tiff", ".tiff":"image/tiff", ".wmf":"image/x-wmf", ".emf":"image/x-emf"}
         for storage_key in self.storage.keys():
             if storage_key.startswith(self.pipeline_storage_prefix):
                 extension = os.path.splitext(storage_key)[1]

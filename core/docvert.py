@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 import tempfile
-import StringIO
+import io 
 import os.path
-import document_type
-import docvert_exception
-import docvert_pipeline
-import docvert_storage
-import docvert_libreoffice
-import docvert_xml
-import opendocument
-import urllib2
+import core.document_type as document_type
+import core.docvert_exception as docvert_exception
+import core.docvert_pipeline as docvert_pipeline
+import core.docvert_storage as docvert_storage 
+import core.docvert_libreoffice as docvert_libreoffice
+import core.docvert_xml as docvert_xml
+import core.opendocument as opendocument
+import urllib.request as urllib2
 
 docvert_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 version = '5.1'
@@ -43,9 +43,8 @@ def process_conversion(files=None, urls=None, pipeline_id=None, pipeline_type="p
             filename = potential_filename
         return filename
 
-    for filename, data in files.iteritems():
+    for filename, data in files.items():
         storage.set_friendly_name(filename, filename)
-
     for url in urls:
         try:
             data = urllib2.urlopen(url, None, http_timeout).read()
@@ -54,12 +53,12 @@ def process_conversion(files=None, urls=None, pipeline_id=None, pipeline_type="p
                 data = html_to_opendocument(data, url)
             filename = _title(url, files, data)
             storage.set_friendly_name(filename, "%s (%s)" % (filename, url))
-            files[filename] = StringIO.StringIO(data)
-        except IOError, e:
+            files[filename] = io.StringIO.StringIO(data)
+        except (io.IOError) as e:
             filename = _title(url, files, None)
             storage.set_friendly_name(filename, "%s (%s)" % (filename, url))
             files[filename] = Exception("Download error from %s: %s" % (url, e))
-    for filename, data in files.iteritems():
+    for filename, data in files.items():
         if storage.default_document is None:
             storage.default_document = filename
         doc_type = document_type.detect_document_type(data)
@@ -69,7 +68,7 @@ def process_conversion(files=None, urls=None, pipeline_id=None, pipeline_type="p
             try:
                 data = generate_open_document(data, converter)
                 doc_type = document_type.types.oasis_open_document
-            except Exception, e:
+            except (Exception) as e:
                 if not suppress_errors:
                     raise e
                 storage.add("%s/index.txt" % filename, str(e))
@@ -112,8 +111,8 @@ def html_to_opendocument(html, url):
                 return "&#%s;" % ord(entity)
             except ValueError:
                 pass
-            except TypeError, e:
-                print "TypeError on '%s'?" % entity
+            except (TypeError) as e:
+                print ("TypeError on '%s'?" % entity)
                 raise
         return text
 
@@ -137,7 +136,7 @@ def display_lines(data, start_line, end_line):
     data = data.split("\n")
     segment = data[start_line:end_line]
     for line in segment:
-        print "%s%s" % (start_line, line)
+        print ("%s%s" % (start_line, line))
         start_line += 1
     
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-import pipeline_item
+import core.pipeline_type.pipeline_item as pipeline_item
 import lxml.etree
 
 class Serialize(pipeline_item.pipeline_stage):

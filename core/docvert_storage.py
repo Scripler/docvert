@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import zipfile
-import StringIO
+import io 
 import time
-import docvert_exception
+import core.docvert_exception as docvert_exception
 import core.docvert_xml
 import core.docvert_exception
 
@@ -31,7 +31,7 @@ class storage(object):
         return self.storage.keys()
 
     def has_key(self, key):
-        return self.storage.has_key(key)
+        return key in self.storage
 
     def __getitem__(self, key):
         return self.get(key)
@@ -128,9 +128,9 @@ class storage_memory_based(storage):
         del self.storage[path]
 
     def to_zip(self):
-        zipdata = StringIO.StringIO()
+        zipdata = io.BytesIO()
         archive = zipfile.ZipFile(zipdata, 'w')
-        for key, value in self.storage.iteritems():
+        for key, value in self.storage.items():
             data = value
             if hasattr(value, "read"):
                 data = value.seek(0)

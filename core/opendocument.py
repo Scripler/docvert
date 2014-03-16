@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import zipfile
-import StringIO
+import io 
 import lxml.etree
 import os.path
 
@@ -25,7 +25,7 @@ def extract_useful_binaries(archive, archive_files, storage, prefix, xml_string)
     xlink_namespace = "http://www.w3.org/1999/xlink"
     xpath_template = '//*[@{%s}href="%s"]' % (xlink_namespace, '%s')
     document = lxml.etree.fromstring(xml_string.getvalue())
-    extensions = [".wmf", ".emf", ".svg", ".png", ".gif", ".bmp", ".jpg", ".jpe", ".jpeg"]
+    extensions = [".wmf", ".emf", ".tiff", ".tif", ".svg", ".png", ".gif", ".bmp", ".jpg", ".jpe", ".jpeg"]
     index = 0
     for archive_path in archive_files:
         path_minus_extension, extension = os.path.splitext(archive_path)
@@ -33,7 +33,7 @@ def extract_useful_binaries(archive, archive_files, storage, prefix, xml_string)
             storage_path = u"%s/file%i.%s" % (prefix, index, extension)
             try:
                 storage_path = u"%s/%s" % (prefix, os.path.basename(archive_path))
-            except UnicodeDecodeError, e:
+            except (UnicodeDecodeError) as e:
                 pass
             #step 1. extract binaries
             storage[storage_path] = archive.open(archive_path).read() 
@@ -43,17 +43,17 @@ def extract_useful_binaries(archive, archive_files, storage, prefix, xml_string)
             for match in xpath(document):
                 match.attrib['{%s}href' % xlink_namespace] = storage_path
             index += 1
-    return StringIO.StringIO(lxml.etree.tostring(document))
+    return io.StringIO(lxml.etree.tostring(document).decode())
 
 def extract_xml(archive, archive_files):
     xml_files_to_extract = ["content.xml", "meta.xml", "settings.xml", "styles.xml"]
-    xml_string = StringIO.StringIO()
+    xml_string = io.StringIO()
     xml_string.write('<docvert:root xmlns:docvert="docvert:5">')
     for xml_file_to_extract in xml_files_to_extract:
         if xml_file_to_extract in archive_files:
             xml_string.write('<docvert:external-file xmlns:docvert="docvert:5" docvert:name="%s">' % xml_file_to_extract)
             document = lxml.etree.fromstring(archive.open(xml_file_to_extract).read()) #parsing as XML to remove any doctype
-            xml_string.write(lxml.etree.tostring(document))
+            xml_string.write(lxml.etree.tostring(document).decode())
             xml_string.write('</docvert:external-file>')
     xml_string.write('</docvert:root>')
     return xml_string
@@ -97,7 +97,7 @@ def generate_single_image_document(image_data, width, height):
           </office:master-styles>
         </office:document-styles>"""
     image_xml = image_xml % (width, height, image_path) #filename doesn't matter
-    zipio = StringIO.StringIO()
+    zipio = io.BytesIO()
     archive = zipfile.ZipFile(zipio, 'w')
     archive.writestr('mimetype', mimetype)
     archive.writestr('content.xml', content_xml % image_xml)

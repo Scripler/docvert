@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import pipeline_item
+import core.pipeline_type.pipeline_item as pipeline_item
 import core.docvert_xml
 
 class DocBookToXHTML(pipeline_item.pipeline_stage):

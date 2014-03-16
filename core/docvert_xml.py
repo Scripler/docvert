@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import docvert_exception
+import core.docvert_exception as docvert_exception
 import lxml.etree
 import xml.sax.saxutils
 
@@ -31,7 +31,7 @@ def get_document(data):
         data.seek(0)
         return lxml.etree.XML(data.read())
     elif data[0:1] == "/" or data[0:1] == "\\": #path
-        return lxml.etree.XML(file(data).read())
+        return lxml.etree.XML(open(data, 'rb').read())
     elif data[0:1] == "<": #xml
         return lxml.etree.XML(data)
     else: #last ditch attempt...

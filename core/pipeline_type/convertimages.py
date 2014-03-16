@@ -2,10 +2,10 @@
 import os
 import os.path
 import tempfile
-import StringIO
-import commands
-import Image # Python PIL
-import pipeline_item
+import io 
+import subprocess 
+import PIL.Image as Image # Python PIL
+import core.pipeline_type.pipeline_item as pipeline_item 
 import core.docvert_xml
 import core.opendocument
 import core.docvert_libreoffice
@@ -32,9 +32,9 @@ class ConvertImages(pipeline_item.pipeline_stage):
             conversion = format.strip(" ._-\n\r").lower()
             if len(conversion) == 0: continue
             from_format, to_format = conversion.split("2")
-            if self.synonym_formats.has_key(from_format):
+            if from_format in self.synonym_formats:
                 from_format = self.synonym_formats[from_format]
-            if not conversions.has_key(from_format):
+            if not from_format in conversions:
                 conversions[from_format] = list()
             intermediate_file_extensions_to_retain.append(str(to_format))
             conversions[str(from_format)].append(str(to_format))
@@ -47,7 +47,7 @@ class ConvertImages(pipeline_item.pipeline_stage):
                 continue
             path, extension = os.path.splitext(storage_path)
             extension_minus_dot = str(extension[1:])
-            for from_format, to_formats in conversions.iteritems():
+            for from_format, to_formats in conversions.items():
                 from_format_method = "convert_%s" % extension_minus_dot
                 if extension_minus_dot == from_format and hasattr(self, from_format_method):
                     for to_format in to_formats:
@@ -68,7 +68,7 @@ class ConvertImages(pipeline_item.pipeline_stage):
             if not extension_minus_dot in intermediate_file_extensions_to_retain:
                 try:
                     del self.storage[intermediate_file]
-                except KeyError, e:
+                except (KeyError) as e:
                     pass
 
         return pipeline_value
@@ -128,7 +128,7 @@ class ConvertImages(pipeline_item.pipeline_stage):
             synonym_from_format = from_format
             if self.synonym_formats.has_key(synonym_from_format):
                 synonym_from_format = self.synonym_formats[synonym_from_format]
-            self.storage[png_path] = self.run_conversion_command_with_temporary_files(storage_path, "rsvg %s %s")
+            self.storage[png_path] = self.run_conversion_command_with_temporary_files(storage_path, "rsvg-convert %s %s")
         else:
             #print "Cache hit! No need to generate %s" % png_path
             pass
@@ -155,7 +155,7 @@ class ConvertImages(pipeline_item.pipeline_stage):
                 return data.read()
             return data
         path, extension = os.path.splitext(storage_path)
-        if self.storage['__convertimages'].has_key(path): #intentionally extensionless because all formats of this single image are considered to have the same dimensions
+        if path in self.storage['__convertimages']: #intentionally extensionless because all formats of this single image are considered to have the same dimensions
             return (self.storage['__convertimages'][path]['width'], self.storage['__convertimages'][path]['height'], pipeline_value)
 
         default_dimensions = ('10cm', '10cm') #we had to choose something
@@ -191,7 +191,7 @@ class ConvertImages(pipeline_item.pipeline_stage):
                     #print "Value is %s" % image_node.attrib[xlink_href_attribute]
             self.storage['__convertimages'][path] = dict(width=width, height=height) #intentionally extensionless because all formats of this single image are considered to have the same dimensions
             return (width, height, lxml.etree.tostring(xml))
-        except KeyError, e:
+        except (KeyError) as e:
             pass
         return default_dimensions[0], default_dimensions[1], pipeline_value
 
@@ -219,7 +219,7 @@ class ConvertImages(pipeline_item.pipeline_stage):
             temporary_from_file.close()
             os_handle, temporary_to_path = tempfile.mkstemp()
             command = command_template % (temporary_from_path, temporary_to_path)
-            std_response = commands.getstatusoutput(command)
+            std_response = subprocess.getstatusoutput(command)
             if os.path.getsize(temporary_to_path) == 0:
                 raise Exception('Error in convertimages.py: No output data created. Command was "%s" which returned "%s"' % (command_template, std_response))
             temporary_to = open(temporary_to_path, 'r')

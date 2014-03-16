@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import lxml.etree
-import pipeline_item
+import core.pipeline_type.pipeline_item as pipeline_item
 import core.docvert_xml
 import core.docvert_exception
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.6
 # -*- coding: utf-8 -*-
 import sys
-import StringIO
+import io
 import uuid
 import os.path
 import copy
@@ -23,19 +23,19 @@ for auto_pipeline in pipeline_types['auto_pipelines']:
 
 class PrintPipelines(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        print "List of all pipelines\n---------------------"
+        print ("List of all pipelines\n---------------------")
         for pipeline_type, pipelines in pipeline_types.iteritems():
-            print "type: %s" % pipeline_type
+            print ("type: %s" % pipeline_type)
             for pipeline in pipelines:
-                print "      - %s" % pipeline['id']
-            print ""
+                print ("      - %s" % pipeline['id'])
+            print ("")
         exit()
 
 parser = argparse.ArgumentParser(description='Converts Office files to OpenDocument, DocBook and HTML.', epilog='E.g.: ./docvert-cli.py doc/sample/sample-document.doc -p="web standards"')
 parser.add_argument('--version', '-v', action='version', version='Docvert %s' % version)
-parser.add_argument('infile', type=file, help='Path or Stdin of Office file to convert', default=sys.stdin, nargs='+')
+parser.add_argument('infile', type=argparse.FileType('rb') , help='Path or Stdin of Office file to convert', default=sys.stdin, nargs='+')
 parser.add_argument('--pipeline', '-p', help='Pipeline you wish to use.', required=True)
-parser.add_argument('--imagedir', '-i', help='Directory to store image files.')
+parser.add_argument('--imagedir', '-i', help='Directory to store image files.', required=True)
 parser.add_argument('--autopipeline', '-a', help='AutoPipeline to use (when your pipeline requires it).', default=default_auto_pipeline, choices=auto_pipelines)
 parser.add_argument('--url', '-u', help='URL to download and convert. Must be an Office file.')
 parser.add_argument('--list-pipelines', '-l', action=PrintPipelines, help='List all pipeline types', nargs=0)
@@ -57,18 +57,18 @@ def process_commands(filesdata, pipeline_id, pipeline_type, auto_pipeline_id, im
         urls.append(url)
     try:
         response = core.docvert.process_conversion(files, urls, pipeline_id, pipeline_type, auto_pipeline_id)
-    except core.docvert_exception.debug_exception, exception:
-        print >> sys.stderr, "%s: %s" % (exception, exception.data)
+    except (core.docvert_exception.debug_exception) as exception:
+        print ("%s: %s" % (exception, exception.data), file=sys.stderr)
 
     folder = 'document-1.doc/'
     for file in response.keys():
         if not (file.endswith('.png') or file.endswith('.jpg')) or file.find('thumbnail') >= 0:
             continue
         file = file.replace(folder, '', 1)
-        fh = open(os.path.join(imagedir, file), 'w')
+        fh = open(os.path.join(imagedir, file), 'wb')
         fh.write(response[folder+file])
         fh.close()
-    print response[folder+'index.html']
+    print (response[folder+'index.html'])
 
 
 

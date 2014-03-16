@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.6
 # -*- coding: utf-8 -*-
 import sys
-import StringIO
+import io
 import uuid
 import os.path
 import copy
@@ -22,17 +22,17 @@ for auto_pipeline in pipeline_types['auto_pipelines']:
 
 class PrintPipelines(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        print "List of all pipelines\n---------------------"
+        print ("List of all pipelines\n---------------------")
         for pipeline_type, pipelines in pipeline_types.iteritems():
-            print "type: %s" % pipeline_type
+            print ("type: %s" % pipeline_type)
             for pipeline in pipelines:
-                print "      - %s" % pipeline['id']
-            print ""
+                print ("      - %s" % pipeline['id'])
+            print ("")
         exit()
 
 parser = argparse.ArgumentParser(description='Converts Office files to OpenDocument, DocBook and HTML.', epilog='E.g.: ./docvert-cli.py doc/sample/sample-document.doc -p="web standards"')
 parser.add_argument('--version', '-v', action='version', version='Docvert %s' % version)
-parser.add_argument('infile', type=file, help='Path or Stdin of Office file to convert', default=sys.stdin, nargs='+')
+parser.add_argument('infile', type=argparse.FileType('rb') , help='Path or Stdin of Office file to convert', default=sys.stdin, nargs='+')
 parser.add_argument('--pipeline', '-p', help='Pipeline you wish to use.', required=True)
 parser.add_argument('--response', '-r', help='Format of ZIP conversion response.', default='auto', choices=['auto','path','stdout'])
 parser.add_argument('--autopipeline', '-a', help='AutoPipeline to use (when your pipeline requires it).', default=default_auto_pipeline, choices=auto_pipelines)
@@ -56,18 +56,18 @@ def process_commands(filesdata, pipeline_id, pipeline_type, auto_pipeline_id, af
         urls.append(url)
     try:
         response = core.docvert.process_conversion(files, urls, pipeline_id, pipeline_type, auto_pipeline_id)
-    except core.docvert_exception.debug_exception, exception:
-        print >> sys.stderr, "%s: %s" % (exception, exception.data)
+    except (core.docvert_exception.debug_exception) as exception:
+        print ("%s: %s" % (exception, exception.data), file=sys.stderr)
     #TODO: when after_conversion="auto"
     if after_conversion == "stdout":
         print >> sys.stdout, response.to_zip().getvalue()
         exit()
     os_handle, zip_path = tempfile.mkstemp()
-    zip_handler = open(zip_path, 'w')
+    zip_handler = open(zip_path, 'wb')
     zip_handler.write(response.to_zip().getvalue())
     zip_handler.close()
     os.rename(zip_path, "%s.zip" % zip_path)
-    print "Success! ZIP conversion at: %s.zip" % zip_path
+    print ("Success! ZIP conversion at: %s.zip" % zip_path)
 
 
    
