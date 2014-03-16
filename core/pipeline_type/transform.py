@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-import StringIO
-import pipeline_item
+import io
+import core.pipeline_type.pipeline_item as pipeline_item
 import core.docvert_exception
 import core.docvert_xml
 

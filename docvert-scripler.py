@@ -68,7 +68,7 @@ def process_commands(filesdata, pipeline_id, pipeline_type, auto_pipeline_id, im
         fh = open(os.path.join(imagedir, file), 'wb')
         fh.write(response[folder+file])
         fh.close()
-    print (response[folder+'index.html'])
+    print (response[folder+'index.html'].decode())
 
 
 

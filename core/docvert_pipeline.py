@@ -35,8 +35,7 @@ def get_pipeline_xml(pipeline_type, pipeline_id, auto_pipeline_id):
         autopipeline_path = os.path.join(docvert_root, "pipelines", "auto_pipelines", auto_pipeline_id, "pipeline.xml")
         if not os.path.exists(path):
             raise docvert_exception.unrecognised_auto_pipeline("Unknown auto pipeline '%s'" % auto_pipeline_id)
-        custom_stages = lxml.etree.tostring(xml.getroot()).decode()
-        #custom_stages = "".join(map(lxml.etree.tostring,xml.getroot()))
+        custom_stages = ''.join([lxml.etree.tostring(sub).decode() for sub in xml.getroot()])
         autopipeline = ""
         try:        
             autopipeline_handle = open(autopipeline_path)
@@ -68,7 +67,7 @@ class pipeline_processor(object):
             stage_class = getattr(stage_module, process)
             stage_instance = stage_class(self.storage, self.pipeline_directory, item['attributes'], self.pipeline_storage_prefix, item['children'], self.depth)
             pipeline_value = stage_instance.stage(pipeline_value)
-            #except ImportError, exception:
+            #except (ImportError) as exception:
             #    raise exception
             #    raise docvert_exception.unknown_docvert_process('Unknown pipeline process of "%s" (at %s)' % (process, "%s.%s" % (namespace, process.lower()) ))
         return pipeline_value
