@@ -78,63 +78,62 @@
     <!--<xsl:variable name="is-a-numbered-list" select="contains($normalized-style-name, $numbered-list-style)"/> -->
     <xsl:variable name="is-a-bullet" select="normalize-space($looks-like-a-bullet)"/>
     <xsl:variable name="inner-text" select="normalize-space(.)"/>
-    <xsl:if test="$inner-text or descendant::draw:frame/draw:image">
-        <xsl:choose>
-            <xsl:when test="not($is-a-bullet) and not($table-heading) and not($document-title) and not($heading)">
-                <xsl:copy>
-                    <xsl:apply-templates select="@*|node()"/>
-                </xsl:copy>
-            </xsl:when>
-            <xsl:when test="$table-heading">
-                <xsl:copy>
-                    <xsl:apply-templates select="@*"/>
-                    <xsl:attribute name="text:class-names">table-heading</xsl:attribute>
-                    <xsl:apply-templates select="node()"/>
-                </xsl:copy>
-            </xsl:when>
-            <xsl:when test="$document-title">
-                <xsl:copy>
-                    <xsl:apply-templates select="@*|node()"/>
-                </xsl:copy>
-            </xsl:when>
-            <xsl:when test="$heading">
-                <xsl:element name="text:h">
-                    <xsl:attribute name="text:outline-level"><xsl:value-of select="$heading-outline-level"/></xsl:attribute>
-                    <xsl:attribute name="text:style-name"><xsl:value-of select="@text:style-name"/></xsl:attribute>
-                    <xsl:apply-templates/>
-                </xsl:element>
-            </xsl:when>
-            <xsl:when test="$is-a-bullet">
-                <xsl:variable name="node-id" select="generate-id()"/>
-                <xsl:variable name="bullet-groups-id" select="generate-id(preceding-sibling::*[not(contains(translate(@text:style-name,$uppercase,$lowercase), $bulleted-list-style))][1])"/>
-                <xsl:variable name="bullet-groups" select="key('bullet-groups', $bullet-groups-id)"/>
-                 <xsl:if test="$node-id = generate-id($bullet-groups[1]) ">
-                    <xsl:element name="text:unordered-list">
-                        <xsl:attribute name="text:style-name"><xsl:value-of select="concat(@text:style-name, '_list-from-normalize-opendocument-xsl')"/></xsl:attribute>
-                        <xsl:for-each select="$bullet-groups">
-                            <xsl:element name="text:list-item">
-                                <xsl:copy>
-                                    <xsl:apply-templates select="@*|node()"/>
-                                </xsl:copy>
-                            </xsl:element>
-                        </xsl:for-each>
-                    </xsl:element>
-                </xsl:if>
-            </xsl:when>
-            <!--
-            <xsl:when test="$is-a-numbered-list">
-                <xsl:element name="text:ordered-list">
+
+    <xsl:choose>
+        <xsl:when test="not($is-a-bullet) and not($table-heading) and not($document-title) and not($heading)">
+            <xsl:copy>
+                <xsl:apply-templates select="@*|node()"/>
+            </xsl:copy>
+        </xsl:when>
+        <xsl:when test="$table-heading">
+            <xsl:copy>
+                <xsl:apply-templates select="@*"/>
+                <xsl:attribute name="text:class-names">table-heading</xsl:attribute>
+                <xsl:apply-templates select="node()"/>
+            </xsl:copy>
+        </xsl:when>
+        <xsl:when test="$document-title">
+            <xsl:copy>
+                <xsl:apply-templates select="@*|node()"/>
+            </xsl:copy>
+        </xsl:when>
+        <xsl:when test="$heading">
+            <xsl:element name="text:h">
+                <xsl:attribute name="text:outline-level"><xsl:value-of select="$heading-outline-level"/></xsl:attribute>
+                <xsl:attribute name="text:style-name"><xsl:value-of select="@text:style-name"/></xsl:attribute>
+                <xsl:apply-templates/>
+            </xsl:element>
+        </xsl:when>
+        <xsl:when test="$is-a-bullet">
+            <xsl:variable name="node-id" select="generate-id()"/>
+            <xsl:variable name="bullet-groups-id" select="generate-id(preceding-sibling::*[not(contains(translate(@text:style-name,$uppercase,$lowercase), $bulleted-list-style))][1])"/>
+            <xsl:variable name="bullet-groups" select="key('bullet-groups', $bullet-groups-id)"/>
+            <xsl:if test="$node-id = generate-id($bullet-groups[1]) ">
+                <xsl:element name="text:unordered-list">
                     <xsl:attribute name="text:style-name"><xsl:value-of select="concat(@text:style-name, '_list-from-normalize-opendocument-xsl')"/></xsl:attribute>
-                    <xsl:element name="text:list-item">
-                        <xsl:copy>
-                            <xsl:apply-templates select="@*|node()"/>
-                        </xsl:copy>
-                    </xsl:element>
+                    <xsl:for-each select="$bullet-groups">
+                        <xsl:element name="text:list-item">
+                            <xsl:copy>
+                                <xsl:apply-templates select="@*|node()"/>
+                            </xsl:copy>
+                        </xsl:element>
+                    </xsl:for-each>
                 </xsl:element>
-            </xsl:when>
-            -->
-        </xsl:choose>
-    </xsl:if>
+            </xsl:if>
+        </xsl:when>
+        <!--
+        <xsl:when test="$is-a-numbered-list">
+            <xsl:element name="text:ordered-list">
+                <xsl:attribute name="text:style-name"><xsl:value-of select="concat(@text:style-name, '_list-from-normalize-opendocument-xsl')"/></xsl:attribute>
+                <xsl:element name="text:list-item">
+                    <xsl:copy>
+                        <xsl:apply-templates select="@*|node()"/>
+                    </xsl:copy>
+                </xsl:element>
+            </xsl:element>
+        </xsl:when>
+        -->
+    </xsl:choose>
 </xsl:template>
 
 <xsl:template match="draw:frame[@text:anchor-page-number='0']"/>
