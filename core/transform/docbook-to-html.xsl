@@ -430,8 +430,8 @@
             </xsl:element>
         </xsl:when>
         <xsl:when test="@role = 'underline'">
-            <xsl:element name="span">
-                <xsl:attribute name="style">text-decoration: underline;</xsl:attribute>
+            <xsl:element name="u">
+                <!--<xsl:attribute name="style">text-decoration: underline;</xsl:attribute>-->
                 <xsl:apply-templates/>
             </xsl:element>
         </xsl:when>
