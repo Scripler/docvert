@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pipeline>
-        <stage process="ConvertImages" formats="wmf2png, wmf2svg, bmp2png" deleteOriginals="true" autoCrop="false" autoCropThreshold="20"/>
+        <!--<stage process="ConvertImages" formats="wmf2png, wmf2svg, bmp2png" deleteOriginals="true" autoCrop="false" autoCropThreshold="20"/>-->
 
         <stage process="TransformOpenDocumentToDocBook" /> <!-- debugAfterDocBookNormalization="true" />--><!-- debugAfterOpenDocumentNormalization="true" /> -->
 
